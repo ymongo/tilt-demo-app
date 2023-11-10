@@ -4,7 +4,7 @@
   import type { SubmitFunction } from '@sveltejs/kit';
 
   export let appliancesInfo: ApplianceInfo[] = [];
-// export let totalConsumed: number
+  // export let totalConsumed: number
 
   let selectedAppliance: string | undefined;
   let addApplianceModal: any;
@@ -49,25 +49,28 @@
     };
   };
 
-  function isOverMAxConsumption():boolean {
-    let isOver=false
-    if(selectedAppliance){
-      const appliance = JSON.parse(selectedAppliance!) as ApplianceInfo
+  function isOverMAxConsumption(): boolean {
+    let isOver = false;
+    if (selectedAppliance) {
+      const appliance = JSON.parse(selectedAppliance!) as ApplianceInfo;
       // isOver = appliance.power *appliance.workingHours + totalConsumed >10
     }
-    return isOver
+    return isOver;
   }
 </script>
 
-<button
-  class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-  type="button"
-  on:click={() => {
-    addApplianceModal.showModal();
-  }}
->
-  Add Appliances
-</button>
+<!-- class="btn btn-primary text-white hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" -->
+<div class="flex flex-row">
+  <div class="mx-auto"><button
+    class="btn btn-primary"
+    type="button"
+    on:click={() => {
+      addApplianceModal.showModal();
+    }}
+  >
+    Add Appliance
+  </button></div>
+</div>
 <dialog id="add-appliance-modal" class="modal" bind:this={addApplianceModal}>
   <div class="modal-box">
     <button
@@ -197,7 +200,9 @@
 
       <div class="modal-action">
         <!-- <form method="post" action=?/addappliance> -->
-        <button class="btn btn-primary mr-2" disabled={!selectedAppliance  || isOverMAxConsumption()}>Add Appliance</button>
+        <button class="btn btn-primary mr-2" disabled={!selectedAppliance || isOverMAxConsumption()}
+          >Add Appliance</button
+        >
         <button type="button" class="btn" on:click={closeResetModal}>Cancel</button>
         <!-- </form> -->
       </div>

@@ -23,7 +23,6 @@
   // $: allAppliances
 
   function getTotalConsumption(): number {
-    console.log('je suis rejoué');
     let total = 0;
     if(profile?.appliances){
       total = profile.appliances.reduce((a: number,b:UserApplianceType) => a + (b.power * b.workingHours), 0)
@@ -33,10 +32,9 @@
 
   let dataAllApp
 
-  // $: dataAllApp = function getAllAppliances() {
-  //   console.log("coucou")
-  //   return JSON.stringify(profile?.appliances)
-  // }
+  dataAllApp = function getAllAppliances() {
+    return JSON.stringify(profile?.appliances)
+  }
 
   const handleSubmit: SubmitFunction = () => {
     loading = true;
@@ -54,34 +52,32 @@
   };
 </script>
 
-<div class="form-widget">
+<div class="p-4 flex flex-col items-center">
   <form
-    class="form-widget"
     method="post"
     action="?/update"
     use:enhance={handleSubmit}
     bind:this={profileForm}
   >
-    <div>
+    <div class="p-2">
       <label for="email">Email</label>
       <input id="email" type="text" value={session.user.email} disabled />
     </div>
 
-    <div>
+    <div class="p-2">
       <label for="username">Username</label>
       <input id="username" name="username" type="text" value={form?.username ?? username} />
     </div>
 
-    <div>
-
+    <div class="p-2">
       {#if profile?.appliances}
       {#key profile.appliances}
       <select hidden name="appliances">
-        <option value={dataAllApp}></option>
+        <option value={JSON.stringify(profile.appliances)}></option>
       </select>
         <p>You have {profile.appliances.length} appliances, consumming {totalConsumed}kWh/day</p>
         {#each profile.appliances as userAppliance}
-          <UserAppliance {userAppliance} {totalConsumed} bind:allAppliances={profile.appliances} />
+          <UserAppliance {userAppliance} {totalConsumed} allAppliances={profile.appliances} />
         {/each}
         {/key}
 
@@ -95,7 +91,7 @@
 
   <form method="post" action="?/signout" use:enhance={handleSignOut}>
     <div>
-      <button class="button block" disabled={loading}>Sign Out</button>
+      <button class="btn block" disabled={loading}>Sign Out</button>
     </div>
   </form>
 </div>
