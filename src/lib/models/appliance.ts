@@ -1,12 +1,12 @@
-export interface UserAppliance extends ApplianceInfo {
-  id: number;
-  label: string;
-  // type: ApplianceType;
-  // workingHours: 0;
-  // power: number;
-  // minWorkingHours: 0;
-  // maxWorkingHours: 0;
-  // workingHoursIncrement: 0;
+import { z } from 'zod';
+
+export interface UserAppliance {
+  id: string;
+  name: string;
+  type: string;
+  category: string;
+  workingHours: number;
+  power: number;
 }
 
 export enum ApplianceType {
@@ -29,3 +29,12 @@ export interface ApplianceInfo {
   maxWorkingHours: 0;
   workingHoursIncrement: 0;
 }
+
+export const UserApplianceSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  type: z.string().min(1),
+  category: z.string().min(1),
+  workingHours: z.number(),
+  power: z.number()
+});

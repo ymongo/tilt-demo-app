@@ -1,11 +1,14 @@
 <script lang="ts">
+  import { enhance } from '$app/forms';
   import { ApplianceType, type ApplianceInfo } from '$lib/models/appliance';
+  import type { SubmitFunction } from '@sveltejs/kit';
 
   export let appliancesInfo: ApplianceInfo[] = [];
-  let selectedAppliance: ApplianceInfo|undefined;
+// export let totalConsumed: number
+
+  let selectedAppliance: string | undefined;
   let addApplianceModal: any;
-
-
+  let applianceForm: HTMLFormElement;
   let power = 0;
   let minWorkingHours = 0;
   let maxWorkingHours = 0;
@@ -14,12 +17,12 @@
   let workingHours = 0;
   let dailyConsumtpion = 0;
 
-  function updateApplianceValues() {
-    selectedAppliance = selectedAppliance!
-    power = selectedAppliance.power;
-    minWorkingHours = selectedAppliance.minWorkingHours;
-    maxWorkingHours = selectedAppliance.maxWorkingHours;
-    workingHoursIncrement = selectedAppliance.workingHoursIncrement;
+  function updateApplianceValues(): void {
+    let selectedApplianceObj = JSON.parse(selectedAppliance!);
+    power = selectedApplianceObj.power;
+    minWorkingHours = selectedApplianceObj.minWorkingHours;
+    maxWorkingHours = selectedApplianceObj.maxWorkingHours;
+    workingHoursIncrement = selectedApplianceObj.workingHoursIncrement;
     workingHours = minWorkingHours;
     workingHoursRange = [];
     for (let i = minWorkingHours + 1; i < maxWorkingHours; i += workingHoursIncrement) {
@@ -28,8 +31,31 @@
     dailyConsumtpion = setConsumption();
   }
 
-  function setConsumption() {
+  function setConsumption(): number {
     return workingHours * power;
+  }
+
+  function closeResetModal(): void {
+    selectedAppliance = undefined;
+    applianceForm.reset();
+    addApplianceModal.close();
+  }
+
+  const handleSubmit: SubmitFunction = () => {
+    return async ({ update }) => {
+      update();
+      selectedAppliance = undefined;
+      addApplianceModal.close();
+    };
+  };
+
+  function isOverMAxConsumption():boolean {
+    let isOver=false
+    if(selectedAppliance){
+      const appliance = JSON.parse(selectedAppliance!) as ApplianceInfo
+      // isOver = appliance.power *appliance.workingHours + totalConsumed >10
+    }
+    return isOver
   }
 </script>
 
@@ -42,17 +68,20 @@
 >
   Add Appliances
 </button>
-  <dialog id="add-appliance-modal" class="modal" bind:this={addApplianceModal}>
-    <div class="modal-box">
-      <button
-        class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-        on:click={() => {
-          addApplianceModal.close()}}>✕</button
-      >
+<dialog id="add-appliance-modal" class="modal" bind:this={addApplianceModal}>
+  <div class="modal-box">
+    <button
+      class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+      on:click={closeResetModal}>✕</button
+    >
 
-      <h3 class="font-bold text-lg">Add new appliance:</h3>
-          <form>
-
+    <h3 class="font-bold text-lg">Add new appliance:</h3>
+    <form
+      method="POST"
+      use:enhance={handleSubmit}
+      action="?/addappliance"
+      bind:this={applianceForm}
+    >
       <div class="form-control w-full max-w-xs">
         <label class="label" for="appliance-name">
           <span class="label-text">What is your appliance name?</span>
@@ -62,6 +91,7 @@
           placeholder="Type here"
           class="input input-bordered w-full max-w-xs"
           name="appliance-name"
+          required
         />
       </div>
 
@@ -73,11 +103,12 @@
           bind:value={selectedAppliance}
           class="select w-full max-w-xs"
           name="appliance-type"
-          on:change={() => updateApplianceValues()}
+          on:change={(e) => updateApplianceValues()}
+          required
         >
           <option disabled selected value={undefined}>Pick your appliance type</option>
           {#each appliancesInfo as appliance}
-            <option value={appliance}
+            <option value={JSON.stringify(appliance)}
               >{Object.values(ApplianceType)[
                 Object.keys(ApplianceType).indexOf(appliance.type)
               ]}</option
@@ -97,7 +128,7 @@
               placeholder="Type here"
               class="input input-bordered w-full max-w-xs"
               name="appliance-power"
-              disabled
+              readonly
               value={power}
             />
             <div class="flex px-4 join-item text-center bg-neutral-focus">
@@ -108,20 +139,34 @@
 
         <div class="form-control w-full max-w-xs">
           <label class="label" for="appliance-working-hours">
-            <span class="label-text">What are your appliance working hours? {workingHours}</span>
+            <span class="label-text">What are your appliance working hours?</span>
           </label>
+          <div class="join w-full max-w-xs mb-2">
+            <input
+              type="number"
+              name="appliance-working-hours"
+              class="input input-bordered w-full max-w-xs"
+              readonly
+              bind:value={workingHours}
+            />
+            <div class="flex px-4 join-item text-center bg-neutral-focus">
+              <div class="my-auto">h</div>
+            </div>
+          </div>
+
           <input
             type="range"
             min={minWorkingHours}
             max={maxWorkingHours}
             class="range range-xs"
             step={workingHoursIncrement}
-            name="appliance-working-hours"
+            name="appliance-working-hours-range"
             bind:value={workingHours}
             on:change={() => {
               dailyConsumtpion = setConsumption();
             }}
           />
+
           <div class="w-full flex justify-between text-xs px-2">
             <span>{minWorkingHours}</span>
             {#each workingHoursRange as interHours}
@@ -149,13 +194,13 @@
           </div>
         </div>
       {/if}
-    </form>
 
       <div class="modal-action">
-        <form method="dialog">
-          <button class="btn btn-primary mr-2">Add Appliance</button>
-          <button class="btn" on:click={()=>{selectedAppliance=undefined}}>Cancel</button>
-        </form>
+        <!-- <form method="post" action=?/addappliance> -->
+        <button class="btn btn-primary mr-2" disabled={!selectedAppliance  || isOverMAxConsumption()}>Add Appliance</button>
+        <button type="button" class="btn" on:click={closeResetModal}>Cancel</button>
+        <!-- </form> -->
       </div>
-    </div>
-  </dialog>
+    </form>
+  </div>
+</dialog>
