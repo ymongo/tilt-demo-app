@@ -1,6 +1,7 @@
 <!-- src/routes/account/+page.svelte -->
 <script lang="ts">
   import { enhance } from '$app/forms';
+    import { invalidateAll } from '$app/navigation';
   import AddAppliance from '$lib/comps/AddAppliance.svelte';
   import UserAppliance from '$lib/comps/UserAppliance.svelte';
   import type {UserAppliance as UserApplianceType}   from '$lib/models/appliance.js';
@@ -8,24 +9,15 @@
   export let data;
   export let form;
 
-  let { session, supabase, profile, appliancesInfo } = data;
-  $: ({ session, supabase, profile, appliancesInfo } = data);
+  let { session, supabase, profile, appliancesInfo, totalConsumed } = data;
+  $: ({ session, supabase, profile, appliancesInfo, totalConsumed } = data);
 
 
   let profileForm: HTMLFormElement;
   let loading = false;
   let username: string = profile?.username ?? '';
 
-  let totalConsumed: number = 0;
-  $: totalConsumed = getTotalConsumption();
-
-  function getTotalConsumption(): number {
-    let total = 0;
-    if(profile?.appliances){
-      total = profile.appliances.reduce((a: number,b:UserApplianceType) => a + (b.power * b.workingHours), 0)
-    }
-    return total;
-  }
+  // $: totalConsumed = getTotalConsumption();
 
   async function deleteAppliance(id:string) {
     const data = new FormData(profileForm)
@@ -34,7 +26,9 @@
     const response = await fetch(profileForm.action, {
       method: 'POST',
       body: data
-    })  }
+    })  
+    invalidateAll()
+  }
 
   const handleSubmit: SubmitFunction = () => {
     loading = true;
@@ -70,7 +64,7 @@
     </div>
 
     <div class="p-2">
-      {#if profile?.appliances}
+      {#if profile?.appliances?.length}
         <p>You have {profile.appliances.length} appliances, consumming {totalConsumed}kWh/day</p>
         {#each profile.appliances as userAppliance}
           <UserAppliance {userAppliance} {totalConsumed} deleteFunction={deleteAppliance} />

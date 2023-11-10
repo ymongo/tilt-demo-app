@@ -2,6 +2,7 @@ import { UserApplianceSchema, type UserAppliance } from '$lib/models/appliance.j
 import { fail, redirect } from '@sveltejs/kit';
 import camelize from 'camelize-ts';
 import { v4 as uuidv4 } from 'uuid';
+import type { UserAppliance as UserApplianceType } from '$lib/models/appliance.js';
 
 export const load = async ({ locals: { supabase, getSession } }) => {
   const session = await getSession();
@@ -19,7 +20,14 @@ export const load = async ({ locals: { supabase, getSession } }) => {
     .eq('id', session.user.id)
     .single();
 
-  return { session, profile, appliancesInfo };
+  let totalConsumed = 0;
+  if (profile?.appliances) {
+    totalConsumed = profile.appliances.reduce(
+      (a: number, b: UserApplianceType) => a + b.power * b.workingHours,
+      0
+    );
+  }
+  return { session, profile, appliancesInfo, totalConsumed };
 };
 
 export const actions = {

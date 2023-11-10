@@ -12,7 +12,7 @@
   }
 
 </script>
-
+{#key userAppliance}
 <div class="m-4 card w-96 bg-base-100 shadow-xl">
   <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" on:click={deleteFunction(userAppliance.id)}>✕</button>
 
@@ -28,3 +28,4 @@
     </p>
   </div>
 </div>
+{/key}
