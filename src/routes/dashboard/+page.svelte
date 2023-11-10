@@ -19,9 +19,6 @@
   let totalConsumed: number = 0;
   $: totalConsumed = getTotalConsumption();
 
-  // let allAppliances = profile?.appliances ?? []
-  // $: allAppliances
-
   function getTotalConsumption(): number {
     let total = 0;
     if(profile?.appliances){
@@ -30,11 +27,14 @@
     return total;
   }
 
-  let dataAllApp
-
-  dataAllApp = function getAllAppliances() {
-    return JSON.stringify(profile?.appliances)
-  }
+  async function deleteAppliance(id:string) {
+    const data = new FormData(profileForm)
+    profile.appliances = profile.appliances.filter((a:any) =>{ return a.id !== id})
+    data.set('appliances', JSON.stringify(profile.appliances))
+    const response = await fetch(profileForm.action, {
+      method: 'POST',
+      body: data
+    })  }
 
   const handleSubmit: SubmitFunction = () => {
     loading = true;
@@ -71,18 +71,13 @@
 
     <div class="p-2">
       {#if profile?.appliances}
-      {#key profile.appliances}
-      <select hidden name="appliances">
-        <option value={JSON.stringify(profile.appliances)}></option>
-      </select>
         <p>You have {profile.appliances.length} appliances, consumming {totalConsumed}kWh/day</p>
         {#each profile.appliances as userAppliance}
-          <UserAppliance {userAppliance} {totalConsumed} allAppliances={profile.appliances} />
+          <UserAppliance {userAppliance} {totalConsumed} deleteFunction={deleteAppliance} />
         {/each}
-        {/key}
 
       {:else}
-        No appliances!
+        <div class="flex flex-row p-2"><div class="mx-auto">No appliances!</div></div>
       {/if}
 
       <AddAppliance {appliancesInfo} />
