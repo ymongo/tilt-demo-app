@@ -19,11 +19,11 @@
   <div class="card-body">
     <h2 class="card-title">{userAppliance.name}</h2>
     <p>Type: {userAppliance.type}</p>
-    <p>Working hours: {userAppliance.workingHours}</p>
-    <p>Power: {userAppliance.power}</p>
-    <p>Energy consumed: {computeEnergyConsumed()}</p>
+    <p>Working hours: {userAppliance.workingHours} h</p>
+    <p>Power: {userAppliance.power} W</p>
+    <p>Energy consumed: {computeEnergyConsumed()} Wh/day</p>
     <p>
-      Relative consuption: {Math.round((computeEnergyConsumed() / totalConsumed) * 100)}% of total
+      Relative consumption: {Math.round((computeEnergyConsumed() / totalConsumed) * 100)}% of total
       consumption
     </p>
   </div>

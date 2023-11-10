@@ -1,4 +1,3 @@
-<!-- src/routes/account/+page.svelte -->
 <script lang="ts">
   import { enhance } from '$app/forms';
     import { invalidateAll } from '$app/navigation';
@@ -16,8 +15,6 @@
   let profileForm: HTMLFormElement;
   let loading = false;
   let username: string = profile?.username ?? '';
-
-  // $: totalConsumed = getTotalConsumption();
 
   async function deleteAppliance(id:string) {
     const data = new FormData(profileForm)
@@ -65,7 +62,7 @@
 
     <div class="p-2">
       {#if profile?.appliances?.length}
-        <p>You have {profile.appliances.length} appliances, consumming {totalConsumed}kWh/day</p>
+        <p>You have {profile.appliances.length} appliances, consumming {totalConsumed}Wh/day</p>
         {#each profile.appliances as userAppliance}
           <UserAppliance {userAppliance} {totalConsumed} deleteFunction={deleteAppliance} />
         {/each}
@@ -74,7 +71,7 @@
         <div class="flex flex-row p-2"><div class="mx-auto">No appliances!</div></div>
       {/if}
 
-      <AddAppliance {appliancesInfo} />
+      <AddAppliance {appliancesInfo} {totalConsumed} />
     </div>
   </form>
 

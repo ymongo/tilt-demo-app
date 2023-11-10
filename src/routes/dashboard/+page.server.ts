@@ -33,10 +33,8 @@ export const load = async ({ locals: { supabase, getSession } }) => {
 export const actions = {
   update: async ({ request, locals: { supabase, getSession } }) => {
     const formData = await request.formData();
-    console.log(formData, 'form');
     const username = formData.get('username') as string;
     const appliances = JSON.parse(formData.get('appliances') as string);
-    console.log(appliances, 'test');
     const session = await getSession();
 
     const { error } = await supabase.from('profiles').upsert({
